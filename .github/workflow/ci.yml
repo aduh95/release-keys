@@ -27,7 +27,10 @@ jobs:
         with:
           persist-credentials: false
       - name: Re-generate gpg folder
-        run: rm -rf gpg && gpg --import keys/*
+        run: |
+          rm -rf "GNUPGHOME"
+          mkdir "GNUPGHOME"
+          gpg --import keys/*
         env:
           GNUPGHOME: ${{ github.workspace }}/gpg
       - run: git diff --exit-code -- gpg
