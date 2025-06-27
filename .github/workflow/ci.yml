@@ -27,5 +27,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Re-generate gpg folder
-        run: echo > gpg/pubring.kbx && GNUPGHOME="$(pwd)/gpg" gpg --import keys/*
+        run: rm -rf gpg && gpg --import keys/*
+        env:
+          GNUPGHOME: ${{ github.workspace }}/gpg
       - run: git diff --exit-code -- gpg
