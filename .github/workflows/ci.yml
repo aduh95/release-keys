@@ -26,17 +26,18 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
         with:
           persist-credentials: false
-      - name: Re-generate gpg folder
+      - name: Export pubring content
         run: |
-          GNUPGHOME="$(mktemp -d)/gpg"
-          ./generate-gpg-dir.sh "$GNUPGHOME"
           gpg --no-default-keyring --keyring "gpg/pubring.kbx" --list-keys --with-colons > all-keys.list
           gpg --no-default-keyring --keyring "gpg/pubring.kbx" --export --armor > all-keys.asc
           gpg --no-default-keyring --keyring "gpg-only-active-keys/pubring.kbx" --list-keys --with-colons > active-keys.list
           gpg --no-default-keyring --keyring "gpg-only-active-keys/pubring.kbx" --export --armor > active-keys.asc
-          git add keys.list keys.asc
-          gpg --no-default-keyring --keyring "$GNUPGHOME/pubring.kbx" --list-keys --with-colons > all-keys.list
-          gpg --no-default-keyring --keyring "$GNUPGHOME/pubring.kbx" --export --armor > all-keys.asc
-          gpg --no-default-keyring --keyring "$GNUPGHOME-only-active-keys/pubring.kbx" --list-keys --with-colons > active-keys.list
-          gpg --no-default-keyring --keyring "$GNUPGHOME-only-active-keys/pubring.kbx" --export --armor > active-keys.asc
+          git add all-keys.list all-keys.asc active-keys.list active-keys.asc
+      - name: Re-generate gpg folder
+        run: |
+          ./generate-gpg-dir.sh
+          gpg --no-default-keyring --keyring "gpg/pubring.kbx" --list-keys --with-colons > all-keys.list
+          gpg --no-default-keyring --keyring "gpg/pubring.kbx" --export --armor > all-keys.asc
+          gpg --no-default-keyring --keyring "gpg-only-active-keys/pubring.kbx" --list-keys --with-colons > active-keys.list
+          gpg --no-default-keyring --keyring "gpg-only-active-keys/pubring.kbx" --export --armor > active-keys.asc
       - run: git diff --exit-code -- all-keys.list all-keys.asc active-keys.list active-keys.asc
